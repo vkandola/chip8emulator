@@ -1,18 +1,18 @@
 package me.vkandola.emulator;
 
-import org.lwjgl.*;
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
+import org.lwjgl.Version;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
 
-import java.nio.*;
-import java.util.HashMap;
+import java.nio.IntBuffer;
 
-import static org.lwjgl.glfw.Callbacks.*;
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
-import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Runner {
     private static final String ROM_PATH = "./roms/PUZZLE";
@@ -23,29 +23,6 @@ public class Runner {
     private VirtualMachine vm = new VirtualMachine();
     private long windowHandle;
     private static final boolean KEYS[] = new boolean[16];
-    private static final HashMap<Integer, Integer> keyEnumToKeyNumber = new HashMap<>();
-
-    private void setupKeymap() {
-        keyEnumToKeyNumber.put(GLFW_KEY_1, 0x1);
-        keyEnumToKeyNumber.put(GLFW_KEY_2, 0x2);
-        keyEnumToKeyNumber.put(GLFW_KEY_3, 0x3);
-        keyEnumToKeyNumber.put(GLFW_KEY_4, 0xC);
-
-        keyEnumToKeyNumber.put(GLFW_KEY_Q, 0x4);
-        keyEnumToKeyNumber.put(GLFW_KEY_W, 0x5);
-        keyEnumToKeyNumber.put(GLFW_KEY_E, 0x6);
-        keyEnumToKeyNumber.put(GLFW_KEY_R, 0xD);
-
-        keyEnumToKeyNumber.put(GLFW_KEY_A, 0x7);
-        keyEnumToKeyNumber.put(GLFW_KEY_S, 0x8);
-        keyEnumToKeyNumber.put(GLFW_KEY_D, 0x9);
-        keyEnumToKeyNumber.put(GLFW_KEY_F, 0xE);
-
-        keyEnumToKeyNumber.put(GLFW_KEY_Z, 0xA);
-        keyEnumToKeyNumber.put(GLFW_KEY_X, 0x0);
-        keyEnumToKeyNumber.put(GLFW_KEY_C, 0xB);
-        keyEnumToKeyNumber.put(GLFW_KEY_V, 0xF);
-    }
 
     public void run() throws Exception {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -61,7 +38,6 @@ public class Runner {
     }
 
     private void init() throws Exception {
-        setupKeymap();
 
         GLFWErrorCallback.createPrint(System.err).set();
 
@@ -77,7 +53,7 @@ public class Runner {
             throw new RuntimeException("Failed to create the GLFW windowHandle");
 
         glfwSetKeyCallback(windowHandle, (window, key, scancode, action, mods) -> {
-            Integer keyNum = keyEnumToKeyNumber.get(key);
+            Integer keyNum = KeyMap.convertKey(key);
             if (keyNum != null) {
                 if (action == GLFW_RELEASE) {
                     KEYS[keyNum] = false;
